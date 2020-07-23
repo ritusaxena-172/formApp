@@ -1,22 +1,28 @@
 import React from 'react'
 import Box from '@material-ui/core/Box';
-import { Radio, Button } from '@material-ui/core';
+import { Button, Paper } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import FormGroup from '@material-ui/core/FormGroup';
-import Switch from '@material-ui/core/Switch'
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import MenuItem from '@material-ui/core/MenuItem';
 import Slider from '@material-ui/core/Slider';
 import DateFnsUtils from '@date-io/date-fns';
+import clsx from 'clsx';
+import useStyles from './styles';
 import {MuiPickersUtilsProvider,KeyboardDatePicker} from '@material-ui/pickers';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-
+import SelectTextField from '../components/SelectTextField'
+import TextFields from '../components/TextField';
+import RadioButton from '../components/RadioButton';
+import FormControllabel from '../components/FormControllabel';
+import {firestore} from '../../config/Firebase/firebase';
+import 'firebase/firestore';
 function FormPage() {
+    const classes=useStyles();
     const [type, setType] = React.useState('');
     const [end, setEnd] = React.useState('');
+    const [mobile, setMobile] = React.useState('');
     const [time, setTime] = React.useState('');
     const [years, setYears] = React.useState('');
     const [webCheck, setWebCheck] = React.useState(false)
@@ -37,22 +43,30 @@ function FormPage() {
                     {value: '3',label: '12-18 months'},
                     {value: '4',label: '>18 months'},];
                     
-    const skills=[{skill:'React'},{skill:'Android Studio'},{skill:'Adobe'},{skill:'Flutter'}]
+    const skills=[{skill:'React'},{skill:'Android Studio'},{skill:'Adobe'},{skill:'Flutter'},{skill:'React-native'},{skill:'Java'},{skill:'Swift'}]
     
     const valuetext=(value)=> {
+        console.log('1')
           return {value};
         }
     const handleChange = (event) => {
+      console.log('2')
+      event.preventDefault()
         setType(event.target.value);
         setTime('')
         };
     const handleYearsChange = (event) => {
+      console.log('3')
+      event.preventDefault()
           setYears(event.target.value);
         };
     const handleTimeChange = (event) => {
+      console.log('4')
+      event.preventDefault()
           setTime(event.target.value);
         };
     const handleWebChange = () => {
+      console.log('5')
           if(mobileCheck){
               setWebCheck(!webCheck)
               setMobileCheck(!mobileCheck)
@@ -62,6 +76,7 @@ function FormPage() {
           }
         };
     const handleMobileChange = () => {
+      console.log('6')
             if(webCheck){
               setMobileCheck(!mobileCheck)
               setWebCheck(!webCheck)
@@ -71,6 +86,7 @@ function FormPage() {
             }
         };
     const handleWebDesignChange = () => {
+      console.log('7')
           if(uiuxCheck){
             setWebDesignCheck(!webDesignCheck)
             setuiuxCheck(!uiuxCheck)
@@ -80,6 +96,7 @@ function FormPage() {
           }
       };
     const handleUIUXChange = () => {
+      console.log('8')
           if(webDesignCheck){
               setWebDesignCheck(!webDesignCheck)
               setuiuxCheck(!uiuxCheck)
@@ -89,63 +106,73 @@ function FormPage() {
           }
       };
     const handleEndChange  = (event) => {
+      console.log('9')
+          console.log('clicked')
+          console.log('end is',end)
+          event.preventDefault();
           setEnd(event.target.value);
         };
+        const handleMobChange  = (event) => {
+          console.log('10')
+          event.preventDefault()
+          setMobile(event.target.value);
+        };
     const handleDateChange = (date) => {
+      console.log('11')
           setSelectedDate(date);
         };
 
-    function SelectTextField(props){
-        return(
-          <TextField select label={props.label} value={props.value} onChange={props.onChange}
-            helperText={props.helperText} variant="outlined" 
-          >
-            {props.array.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-        )
-    }
-
+        function StoreInFirebase(){
+         firestore.collection('data').add({
+            end:end
+          });
+        }
+     function TextTypography(props) {
+          return (
+             <Typography variant='h5'>
+                {props.text}
+             </Typography>
+          )
+    } 
     function PersonalDetails(){
       return(
+        <Paper elevation={3} className={clsx(classes.paper1)}>
           <Grid container direction={"column"} spacing={3} >
-            <Typography>Personal details</Typography>
+            <TextTypography text='Personal Details'/>
             <Grid item>
-              <TextField label="Name" variant="outlined" />
+              <TextFields label='Name'/>
             </Grid>
             <Grid item>
-              <TextField label="Email" variant="outlined" />
+              <TextFields label="Email"/>
             </Grid>
             <Grid item>
-              <TextField label="Organization" variant="outlined" />
+              <TextFields label="Organization"/>
             </Grid>
             <Grid item>
             <SelectTextField label="Select" value={years} onChange={handleYearsChange} 
             helperText="Please select your year of experience" array={experience}/>
             </Grid>
           </Grid>
+          </Paper>
         );
     }
 
     function Options(){
       if(webCheck){
           return(
-            <RadioGroup  onChange={handleEndChange} >
-              <FormControlLabel value="front end" labelPlacement='start'  control={<Radio />} label="Front End"  />
-              <FormControlLabel value="back end" labelPlacement='start' control={<Radio />} label="Back End"  />
-              <FormControlLabel value="both" labelPlacement='start' control={<Radio />} label="Both"  />
+            <RadioGroup onChange={handleEndChange} >
+              <RadioButton  value='front end' label='Front End'/>
+              <RadioButton  value='back end' label='Back End'/>
+              <RadioButton value='both' label='Both'/>
             </RadioGroup>
           );
       } 
       else if(mobileCheck){
           return(
-            <RadioGroup  onChange={handleEndChange} >
-              <FormControlLabel value="ios" labelPlacement='start'  control={<Radio />} label="iOS"  />
-              <FormControlLabel value="android" labelPlacement='start' control={<Radio />} label="Android"  />
-              <FormControlLabel value="both" labelPlacement='start' control={<Radio />} label="Both"  />
+            <RadioGroup  onChange={handleMobChange} >
+              <RadioButton value='android' label='Android'/>
+              <RadioButton value='ios' label='iOS'/>
+              <RadioButton value='both' label='Both'/>
             </RadioGroup>
           );
       }
@@ -153,8 +180,9 @@ function FormPage() {
 
     function TimeProject(){
       return(
+        <Paper elevation={3} className={clsx(classes.paper3)}>
         <Grid container width={30} direction={"column"} spacing={3} >
-          <Typography>Duration of the project</Typography>
+        <TextTypography text='About the Project'/>
             <Grid item>
               <SelectTextField label="Select" value={time} onChange={handleTimeChange} helperText="Select the duration of project" array={times}/>
             </Grid>
@@ -164,34 +192,44 @@ function FormPage() {
               <TextField {...params} variant="outlined" label="Skills Required" placeholder="Add" /> )} />
             </Grid>
             <Grid item>
-              {time!=''&&((webDesignCheck||uiuxCheck)||end)?<Button variant="contained" color="primary" size="large">Save Data</Button>:null}
+              {time!=''&&((end!=''||mobile!='')||(webDesignCheck||uiuxCheck))?<Button className={clsx(classes.button1)} variant="contained" color="primary" onClick={StoreInFirebase}>Save Data</Button>:null}
             </Grid>
         </Grid>
+        </Paper>
       );
     }
 
     function DeveloperOptions(){
       return(  
-        <FormGroup>
-          <Typography>Developer for</Typography>
-              <FormControlLabel control={<Switch checked={webCheck} onClick={handleWebChange}name="web" />} label="Web Development"/> 
+        <Paper elevation={3} className={clsx(classes.paper2)}>
+           <Grid container width={30} direction={"column"} spacing={2} >
+           <TextTypography text='Developer for'/>
+            {/* <FormGroup> */}
+            <Grid item>
+            <FormControllabel checked={webCheck} onClick={handleWebChange} label="Web Development"/>
               {webCheck&&!mobileCheck?<Options/>:null}
-              <FormControlLabel control={<Switch checked={mobileCheck} onClick={handleMobileChange} name="mobile" />} label="Mobile Development"/>
+            </Grid>
+            <Grid item>
+            <FormControllabel checked={mobileCheck} onClick={handleMobileChange} label="Mobile Development"/>
               {!webCheck&&mobileCheck?<Options/>:null} <br/>
+              </Grid>
+              <Grid item>
               <Common/>
-        </FormGroup> 
+              </Grid>
+          {/* </FormGroup>  */}
+          </Grid>
+       </Paper>
         );
     }
 
     function Common(){
       return(
         <Box>
-          <Typography gutterBottom>{type=='developer'?'Developers needed':'Designers needed'}</Typography>
-            <Slider max={50} defaultValue={20} color='secondary'getAriaValueText={valuetext}
-            step={2} valueLabelDisplay="auto"marks={marks}
-          /> 
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker disableToolbar variant="inline" format="MM/dd/yyyy" margin="normal" color='primary'
+          <Typography variant='h6'>{type=='developer'?'Developers needed':'Designers needed'}</Typography>
+            <Slider max={50} defaultValue={20} color='secondary' getAriaValueText={valuetext}
+            step={2} valueLabelDisplay="auto"marks={marks} className={clsx(classes.wide)}/>  
+          <MuiPickersUtilsProvider utils={DateFnsUtils} >
+            <KeyboardDatePicker className={clsx(classes.wide)} disableToolbar variant="inline" format="MM/dd/yyyy" margin="normal" color='primary'
             label="Start date of the project" value={selectedDate} onChange={handleDateChange} KeyboardButtonProps={{'aria-label': 'change date' }}/>
             </MuiPickersUtilsProvider>
         </Box>
@@ -199,33 +237,36 @@ function FormPage() {
     }
     function DesignerOptions(){
       return(
-        <FormGroup>
-          <Typography>Designer for</Typography>
-          <FormControlLabel control={<Switch checked={webDesignCheck} onClick={handleWebDesignChange} name="web" />} label="Web Designing"/>
-          <FormControlLabel control={<Switch checked={uiuxCheck} onClick={handleUIUXChange} name="uiux" />} label="UI/UX Designing"/> <br/>
-          <Common/>
-        </FormGroup>      
+        <Paper className={clsx(classes.paper2)}>
+          <Grid container width={30} direction={"column"} spacing={3} >
+          <TextTypography text='Designer for'/>
+            <Grid item>
+            <FormControllabel checked={webDesignCheck} onClick={handleWebDesignChange} label="Web Designing"/>
+            </Grid>
+            <Grid item>
+            <FormControllabel checked={uiuxCheck} onClick={handleUIUXChange} label="UI/UX Designing"/>
+            </Grid>
+            <Grid item>
+            <Common/>
+            </Grid>
+            </Grid>
+        </Paper>    
       )
     }
   return (
         <Box>
           <Box bgcolor="primary.main" color="primary.contrastText" p={2}>
-            <h1>Let us get to know you better!</h1> Are you looking for?
+            <h1>Let us get to know you better!</h1> 
+            <TextTypography text='Are you looking for?'/>
             <RadioGroup  onChange={handleChange} row>
-              <FormControlLabel value="developer" labelPlacement='start'  control={<Radio />} label="Developer"  />
-              <FormControlLabel value="designer" labelPlacement='start' control={<Radio />} label="Designer"  />
+              <RadioButton value='developer'label='Developer'/>
+              <RadioButton value='designer'label='Designer'/>
             </RadioGroup>
           </Box >
-          <Box  margin={7} display="flex" flexDirection="row">
-            <Box style={ {width: 300}}>
+          <Box margin={4} display="flex" flexDirection="row">
               {type!=''?<PersonalDetails/>:null}
-            </Box >
-            <Box style={ {width: 300}} margin={4} >
               {type!=''?(type=='developer'?<DeveloperOptions/>:<DesignerOptions/>):null}
-            </Box>
-            <Box style={ {width: 300}} margin={5}>
-              {type!=''&&(end!=''||webDesignCheck||uiuxCheck)?<TimeProject/>:null}
-            </Box>
+              {type!=''&&((end!=''||mobile!='')||(webDesignCheck||uiuxCheck))?<TimeProject/>:null}
           </Box> 
         </Box>
       )
